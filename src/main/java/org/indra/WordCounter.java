@@ -42,7 +42,9 @@ public class WordCounter {
             results.forEach((ruleName, matched) ->
                     logger.info("{} {} count: {}, {} Matched words: {}", System.lineSeparator(), ruleName, matched.size(), System.lineSeparator(), matched));
         } catch (IOException e) {
-            logger.error("An exception occurred : {}", e.getMessage());
+            logger.error("An IOException occurred : ", e);
+        } catch (Exception e) {
+            logger.error("An Exception occurred : ", e);
         }
     }
 
