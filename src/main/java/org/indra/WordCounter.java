@@ -8,6 +8,7 @@ import org.indra.rules.impl.StartsWithMRule;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -27,9 +28,16 @@ public class WordCounter {
         } else {
             logger.info("Using supplied input file: {}", filePath);
         }
-        String content;
+
+        Path path = Paths.get(filePath).normalize();
+        if (!Files.isRegularFile(path) || !Files.isReadable(path)) {
+            logger.error("Invalid or unreadable file: {}", path);
+            System.exit(1);
+        }
+
+
         try {
-            content = Files.readString(Paths.get(filePath));
+            String content = Files.readString(path);
             String[] words = content.split("\\W+");
 
             List<RuleStrategy> rules = List.of(
