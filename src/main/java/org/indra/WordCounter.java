@@ -7,6 +7,8 @@ import org.indra.rules.impl.LongWordRule;
 import org.indra.rules.impl.StartsWithMRule;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,28 +18,39 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class WordCounter {
+    private static final String DEFAULT_FILE = "input.txt";
     private static final Logger logger = LogManager.getLogger(WordCounter.class);
 
     public static void main(String[] args) {
-        String defaultFilePath = "src/main/resources/input.txt";
+        String defaultResource = DEFAULT_FILE;
         boolean usingDefault = args.length == 0 || args[0].isBlank();
         // Use user-supplied file if provided, else default
-        String filePath = usingDefault ? defaultFilePath : args[0];
-        if (usingDefault) {
-            logger.info("No input file supplied. Using default file: {}", filePath);
-        } else {
-            logger.info("Using supplied input file: {}", filePath);
-        }
-
-        Path path = Paths.get(filePath).normalize();
-        if (!Files.isRegularFile(path) || !Files.isReadable(path)) {
-            logger.error("Invalid or unreadable file: {}", path);
-            System.exit(1);
-        }
-
+        String filePath = usingDefault ? defaultResource : args[0];
 
         try {
-            String content = Files.readString(path);
+            String content;
+
+            if (usingDefault) {
+                logger.info("No input file supplied. Using default resource: {}", defaultResource);
+
+                try (InputStream in = WordCounter.class.getClassLoader().getResourceAsStream(defaultResource)) {
+                    if (in == null) {
+                        logger.error("Default resource '{}' not found on classpath.", defaultResource);
+                        System.exit(1);
+                    }
+                    content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+                }
+            } else {
+                logger.info("Using supplied input file: {}", filePath);
+
+                Path path = Paths.get(filePath).normalize();
+                if (!Files.isRegularFile(path) || !Files.isReadable(path)) {
+                    logger.error("Invalid or unreadable file: {}", path);
+                    System.exit(1);
+                }
+                content = Files.readString(path);
+            }
+
             String[] words = content.split("\\W+");
 
             List<RuleStrategy> rules = List.of(
