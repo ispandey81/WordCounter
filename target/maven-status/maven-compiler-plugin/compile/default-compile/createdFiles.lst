@@ -1,0 +1,4 @@
+org/indra/rules/impl/StartsWithMRule.class
+org/indra/rules/RuleStrategy.class
+org/indra/rules/impl/LongWordRule.class
+org/indra/WordCounter.class
